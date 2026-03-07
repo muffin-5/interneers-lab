@@ -31,17 +31,27 @@ def list_products(request):
     page = int(request.GET.get("page", 1))
     limit = min(int(request.GET.get("limit", 10)), 50)
 
+    limit = min(limit, 50)
+
     start = (page - 1) * limit
     end = start + limit
 
     paginated_products = products[start:end]
 
+    total_items = len(products)
+    total_pages = (total_items + limit - 1) // limit
+
     return Response(
         {
-            "page": page,
-            "limit": limit,
-            "total": len(products),
-            "products": paginated_products,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total_items": total_items,
+                "total_pages": total_pages,
+                "has_next": page < total_pages,
+                "has_previous": page > 1,
+            },
+            "data": paginated_products,
         }
     )
 
@@ -54,7 +64,7 @@ def get_product(request, pk):
             "Product not found",
             status_code=status.HTTP_404_NOT_FOUND,
         )
-    return Response(product, status=status.HTTP_200_OK)
+    return success_response(product)
 
 
 @api_view(["PUT"])
