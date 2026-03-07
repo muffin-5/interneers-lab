@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "inventory",
 ]
 
 MIDDLEWARE = [
@@ -80,6 +82,29 @@ DATABASES = {
     }
 }
 
+# Database
+# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+
+from dotenv import load_dotenv
+import os
+from pymongo import MongoClient
+
+# Load environment variables from .env file
+load_dotenv()
+
+MONGO_USER = os.getenv("MONGO_USER", "root")
+MONGO_PASS = os.getenv("MONGO_PASS", "example")
+MONGO_PORT = os.getenv("MONGO_PORT", "27019")
+MONGO_HOST = os.getenv("MONGO_HOST", "localhost")
+
+# MongoDB Client
+client = MongoClient(
+    f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/?authSource=admin"
+)
+
+# Django still requires DATABASES variable
+DATABASES = {}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -103,7 +128,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en-us" 
 
 TIME_ZONE = "UTC"
 
