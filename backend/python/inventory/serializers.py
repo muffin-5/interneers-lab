@@ -1,4 +1,5 @@
-from rest_framework import serializers 
+from rest_framework import serializers
+
 
 class ProductSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -13,14 +14,15 @@ class ProductSerializer(serializers.Serializer):
         if value < 0:
             raise serializers.ValidationError("Price must be a non-negative number.")
         return value
-    
+
     def validate_quantity(self, value):
         if value < 0:
-            raise serializers.ValidationError("Quantity must be a non-negative integer.")
+            raise serializers.ValidationError(
+                "Quantity must be a non-negative integer."
+            )
         return value
-    
+
     def validate_name(self, value):
         if not value.strip():
             raise serializers.ValidationError("Name cannot be empty.")
         return value
-
