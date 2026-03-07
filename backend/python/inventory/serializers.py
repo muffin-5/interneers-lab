@@ -11,7 +11,7 @@ class ProductSerializer(serializers.Serializer):
     quantity = serializers.IntegerField()
 
     def validate_price(self, value):
-        if value < 0:
+        if value <= 0:
             raise serializers.ValidationError("Price must be a non-negative number.")
         return value
 

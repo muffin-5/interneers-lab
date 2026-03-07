@@ -1,5 +1,3 @@
-from django.shortcuts import render
-
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -17,12 +15,37 @@ def create_product(request):
         products_db[current_id] = product
         current_id += 1
         return Response(product, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        {
+            "status": "error",
+            "message": "Invalid product data",
+            "errors": serializer.errors,
+        },
+        status=status.HTTP_400_BAD_REQUEST,
+    )
 
 
 @api_view(["GET"])
 def list_products(request):
-    return Response(list(products_db.values()), status=status.HTTP_200_OK)
+    # add pagination to list_products
+    products = list(products_db.values())
+
+    page = int(request.GET.get("page", 1))
+    limit = min(int(request.GET.get("limit", 10)), 50)
+
+    start = (page - 1) * limit
+    end = start + limit
+
+    paginated_products = products[start:end]
+
+    return Response(
+        {
+            "page": page,
+            "limit": limit,
+            "total": len(products),
+            "products": paginated_products,
+        }
+    )
 
 
 @api_view(["GET"])
@@ -30,7 +53,10 @@ def get_product(request, pk):
     product = products_db.get(pk)
     if not product:
         return Response(
-            {"error": "Product not found"},
+            {
+                "status": "error",
+                "message": "Product not found",
+            },
             status=status.HTTP_404_NOT_FOUND,
         )
     return Response(product, status=status.HTTP_200_OK)
@@ -41,7 +67,10 @@ def update_product(request, pk):
     product = products_db.get(pk)
     if not product:
         return Response(
-            {"error": "Product not found"},
+            {
+                "status": "error",
+                "message": "Product not found",
+            },
             status=status.HTTP_404_NOT_FOUND,
         )
 
@@ -52,14 +81,24 @@ def update_product(request, pk):
         products_db[pk] = updated
         return Response(updated, status=status.HTTP_200_OK)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(
+        {
+            "status": "error",
+            "message": "Invalid product data",
+            "errors": serializer.errors,
+        },
+        status=status.HTTP_400_BAD_REQUEST,
+    )
 
 
 @api_view(["DELETE"])
 def delete_product(request, pk):
     if pk not in products_db:
         return Response(
-            {"error": "Product not found"},
+            {
+                "status": "error",
+                "message": "Product not found",
+            },
             status=status.HTTP_404_NOT_FOUND,
         )
     del products_db[pk]
